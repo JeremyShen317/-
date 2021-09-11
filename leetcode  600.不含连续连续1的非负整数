@@ -1,0 +1,76 @@
+leetcode 
+600.不含连续连续1的非负整数
+给定一个正整数 n，找出小于或等于 n 的非负整数中，其二进制表示不包含 连续的1 的个数。
+
+示例 1:
+
+输入: 5
+输出: 5
+解释: 
+下面是带有相应二进制表示的非负整数<= 5：
+0 : 0
+1 : 1
+2 : 10
+3 : 11
+4 : 100
+5 : 101
+其中，只有整数3违反规则（有两个连续的1），其他5个满足规则。
+说明: 1 <= n <= 109
+
+解析：
+首先，分析数据量，此题肯定需要O(n)之下的复杂度，暴力并不能AC。
+接着我想到利用二进制每一位的状态进行动态规划
+对于一位二进制数 0 1 ，不管以0开头，还是以1开头都满足要求
+两位二进制数，以1开头，只能为11；以0开头，则有01,00;
+...
+因此dp数组状态就是，第i位为1还是为0，记录
+状态转移方程为，如果此位为1，则其低位必须为0，故dp[i][1]=dp[i-1][0];如果此位为0，则dp[i][0]=dp[i-1][0]+dp[i-1][1];
+在实际写法中，我用dp[i].first，dp[i].second表示为0和为1 
+dp[i].first = dp[i - 1].first + dp[i - 1].second;
+dp[i].second = dp[i - 1].first;
+然后我们便得到了原数位的每一位以 0 或 1 开头的满足条件的二进制数的个数。最后，我们只需要从高位向低位遍历进行计算即可。
+规则是每当我们遇到 n 的二进制中的一个 1，我们便给 ans 加上此位以 0 开头的个数；若连续遇到了两个 1，便直接退出(因为后续的数字都不可能满足条件)；
+注意，若数字 n 本身是满足条件的，我们这种算法将少算数字 n 自身一次，所以需要使用 flag 记录数字 n 本身是否是满足条件的。
+
+最终代码如下：
+class Solution {
+public:
+    int findIntegers(int n) {
+        int size = 0, tmp = n;
+        while (tmp != 0)
+        {
+            tmp >>= 1;
+            ++size;
+        }
+        vector<pair<int, int>> dp(size);
+        dp[0].first = 1;
+        dp[0].second = 1;
+        for (int i = 1; i < size; ++i)
+        {
+            dp[i].first = dp[i - 1].first + dp[i - 1].second;
+            dp[i].second = dp[i - 1].first;
+        }
+
+        int ans = 0;
+        int pre = 0;
+        bool flag = true;
+        while (size-- != 0)
+        {
+            if ((n & (1 << size)) != 0)
+            {
+                ans += dp[size].first;
+                if (pre == 1) 
+                {
+                    flag = false;
+                    break;
+                }
+                else pre = 1;
+            }
+            else 
+            {
+                pre = 0;
+            }
+        }
+        return ans + flag;
+    }
+};
