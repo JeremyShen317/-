@@ -1,0 +1,65 @@
+52. N皇后 II'
+n 皇后问题 研究的是如何将 n 个皇后放置在 n×n 的棋盘上，并且使皇后彼此之间不能相互攻击。
+
+给你一个整数 n ，返回 n 皇后问题 不同的解决方案的数量。
+
+解析:
+熟悉的N皇后问题，主要还是对回溯算法的熟悉程度，把握好皇后的进攻路线，建立棋盘图，每落下一个皇后，去除棋盘上所有不能下的点。
+为了方便回溯，使用了int类型的棋盘，有一个皇后能攻击到这一点就加1，回溯去掉皇后的时候就减1，为0的点才能放置皇后。
+
+代码如下：
+class Solution {
+public:
+    vector<vector<int>> chess;
+    int res=0;
+
+    void deal(int x,int y,int k,int n)
+    {
+        for (int i=0; i<n; i++) //竖线
+            chess[i][y]+=k;
+
+        for (int i=x,j=y; i<n && j<n; i++,j++) //左上到右下
+            chess[i][j]+=k;
+        for (int i=x,j=y; i>=0 && j>=0; i--,j--)
+            chess[i][j]+=k;  
+
+        for (int i=x,j=y; i>=0 && j<n; i--,j++) //右上到左下
+            chess[i][j]+=k;
+            
+        for (int i=x,j=y; i<n &&j>=0; i++,j--)
+            chess[i][j]+=k;
+    }
+
+    void print(vector<vector<int>>& a)
+    {
+        for (int i=0; i<a.size(); i++)
+        {
+            for (int j=0; j<a[0].size(); j++)
+            cout << a[i][j] << ' ';
+            cout << endl;
+        }
+    }
+
+    void dfs(int x,int& n)
+    {
+
+        if (x==n)
+        {
+            res++;
+            return;
+        }
+        for (int y=0; y<n; y++)
+            if (chess[x][y]==0)
+            {
+            deal(x,y,1,n);
+            dfs(x+1,n);
+            deal(x,y,-1,n);
+            }   
+    }
+
+    int totalNQueens(int n) {
+        chess = vector<vector<int>>(n,vector<int>(n,0));
+        dfs(0,n);
+        return res;
+    }
+};
