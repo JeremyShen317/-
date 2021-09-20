@@ -1,0 +1,72 @@
+312. 戳气球
+有 n 个气球，编号为0 到 n - 1，每个气球上都标有一个数字，这些数字存在数组 nums 中。
+
+现在要求你戳破所有的气球。戳破第 i 个气球，你可以获得 nums[i - 1] * nums[i] * nums[i + 1] 枚硬币。 这里的 i - 1 和 i + 1 代表和 i 相邻的两个气球的序号。如果 i - 1或 i + 1 超出了数组的边界，那么就当它是一个数字为 1 的气球。
+
+求所能获得硬币的最大数量。
+
+ 
+
+示例 1：
+输入：nums = [3,1,5,8]
+输出：167
+解释：
+nums = [3,1,5,8] --> [3,5,8] --> [3,8] --> [8] --> []
+coins =  3*1*5    +   3*5*8   +  1*3*8  + 1*8*1 = 167
+示例 2：
+
+输入：nums = [1,5]
+输出：10
+ 
+
+提示：
+
+n == nums.length
+1 <= n <= 500
+0 <= nums[i] <= 100
+
+解析：
+按照不同顺序戳气球，每次收益为nums[i - 1] * nums[i] * nums[i + 1]，如果越界则为1，求获得最大的硬币收益。
+粗略思考：可以使用dfs算法，枚举每一次戳哪一个气球，戳完N个气球后，更新目前为止的最大硬币数，即可知道最佳方案。时间复杂度约为O(N!)。显然超时。。。
+进一步思考：
+题目中为每一次戳一个气球，直到戳光所有气球。如果变成，每次放上去一个气球，使最后气球排列如输入一样时，可以获得的最大硬币数。
+定义一个solve(l,r)算法，l和r已放入，计算在放入范围[l,r]所有气球时所能获得的最大硬币数，枚举此时放入的气球为i(l<= i <=l)
+则solve(l,r)=nums[l]*nums[i]*nums[r]+solve(l,i)+solve(i,k)
+即放入i到l和r之间，并计算两边即可。
+并且使用此种方法可以加入记忆化数组，使搜索效率大大提高
+
+代码如下：
+class Solution {
+public:
+    vector<vector<int>> rec;
+    vector<int> val;
+
+public:
+    int solve(int left, int right) {
+        if (left+1==right) {//中间至少有一个数
+            return 0;
+        }
+        if (rec[left][right] != -1) {//记忆化数组优化
+            return rec[left][right];
+        }
+        for (int i = left + 1; i < right; i++) {
+            int sum = val[left] * val[i] * val[right];
+            sum += solve(left, i) + solve(i, right);
+            rec[left][right] = max(rec[left][right], sum);
+        }
+        return rec[left][right];
+    }
+
+    int maxCoins(vector<int>& nums) {
+        int n = nums.size();
+        val.resize(n + 2);
+        for (int i = 1; i <= n; i++) {
+            val[i] = nums[i - 1];
+        }
+        val[0] = val[n + 1] = 1;
+        rec.resize(n + 2, vector<int>(n + 2, -1));
+        return solve(0, n + 1);
+    }
+};
+
+
