@@ -1,0 +1,51 @@
+583. 两个字符串的删除操作
+给定两个单词 word1 和 word2，找到使得 word1 和 word2 相同所需的最小步数，每步可以删除任意一个字符串中的一个字符。
+
+ 
+
+示例：
+
+输入: "sea", "eat"
+输出: 2
+解释: 第一步将"sea"变为"ea"，第二步将"eat"变为"ea"
+ 
+
+提示：
+
+给定单词的长度不超过500。
+给定单词中的字符只含有小写字母。
+
+解析：
+这是一题典型的动态规划解决字符串匹配的问题，话不多少直接上思路
+
+定义dp数组dp[i][j]，其意义为word1的前i个字符与word2的前j个字符匹配，所需要的的最少操作次数
+
+状态定义完了，考虑状态如何转移：
+
+word1和word2匹配有两种情况：
+1.word1的第i个字符与word2的第j个字符一样，则dp[i][j]=dp[i-1][j-1]。因为当前字符匹配，则前一个字符所需要的的操作数就是当前状态的最小操作数
+2.word1的第i个字符与word2的第j个字符不一样，则有两种方案，删除word1的第i个字符，那么就变成了前i-1个字符与word2的前j个字符匹配，dp[i][j]=dp[i-1][j]+1；
+  第二种方案，在word1后加一个字符与word2匹配，此时，word1的前i个字符匹配的则是word2的前j-1个字符，dp[i][j]=dp[i][j-1]+1；
+  这两种方案都可以，顾两者取其小就可以了
+3.dp数组状态初始化，显然0长度的字符与任意字符匹配都是该字符串长度，固有dp[0][i]=i,dp[i][0]=0;
+以上就是动态规划的全过程。
+
+代码如下：
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        int l1=word1.size();
+        int l2=word2.size();
+        vector<vector<int>> dp(l1+1,vector<int>(l2+1,0));
+        for (int i=0; i<=l1; i++) dp[i][0]=i;
+        for (int i=0; i<=l2; i++) dp[0][i]=i;
+        
+        for (int i=1; i<=l1; i++)
+            for (int j=1; j<=l2; j++)
+            if (word1[i-1]==word2[j-1]) dp[i][j]=dp[i-1][j-1];
+            else dp[i][j]=min(dp[i-1][j],dp[i][j-1])+1;
+
+            
+        return dp[l1][l2];
+    }
+};
