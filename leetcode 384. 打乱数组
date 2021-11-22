@@ -1,0 +1,80 @@
+leetcode 384. 打乱数组
+给你一个整数数组 nums ，设计算法来打乱一个没有重复元素的数组。
+
+实现 Solution class:
+
+Solution(int[] nums) 使用整数数组 nums 初始化对象
+int[] reset() 重设数组到它的初始状态并返回
+int[] shuffle() 返回数组随机打乱后的结果
+ 
+
+示例：
+
+输入
+["Solution", "shuffle", "reset", "shuffle"]
+[[[1, 2, 3]], [], [], []]
+输出
+[null, [3, 1, 2], [1, 2, 3], [1, 3, 2]]
+
+解释
+Solution solution = new Solution([1, 2, 3]);
+solution.shuffle();    // 打乱数组 [1,2,3] 并返回结果。任何 [1,2,3]的排列返回的概率应该相同。例如，返回 [3, 1, 2]
+solution.reset();      // 重设数组到它的初始状态 [1, 2, 3] 。返回 [1, 2, 3]
+solution.shuffle();    // 随机返回数组 [1, 2, 3] 打乱后的结果。例如，返回 [1, 3, 2]
+ 
+
+提示：
+
+1 <= nums.length <= 200
+-106 <= nums[i] <= 106
+nums 中的所有元素都是 唯一的
+最多可以调用 5 * 104 次 reset 和 shuffle
+
+个人题解
+本题用到经典的洗牌算法，要保证随机出每组结果的概率一致。
+n个数的排列有n！种方式，因为选择第一个数有n种方式，第二个数有n-1种...第n-1个数有2种，第n个数有1种方式。
+直观的来解决这个问题，就是将这n！种方式编号，然后进行随机。但显然实现起来比较困难，毕竟1 <= nums.length <= 200
+进一步思考，我们要对每一位进行随机，使该位上出现每个数的概率相同。
+第一位，直接从n个数随机，其概率为1/n
+第二位，从余下n-1个数随机，其概率为(n-1)/n * 1/(n-1) = 1/n
+依次类推...
+而转换成代码如下：
+ for (int i = 0; i < n; i++) {
+    int tmp;
+    int target = i + rand() % (n - i); //前i-1位已经确定，仅在之后的i到(n-i)中随机
+    tmp = current[i];
+    current[i] = current[target];
+    current[target] = tmp;
+}
+
+代码如下：
+class Solution {
+public:
+    vector<int> origin;
+    vector<int> current;
+    int n;
+
+    Solution(vector<int>& nums) {
+        origin = nums;
+        current = nums;
+        n = nums.size();
+    }
+    
+    vector<int> reset() {
+        current = origin;
+        return current;
+    }
+    
+    vector<int> shuffle() {
+        for (int i = 0; i < n; i++) {
+            int tmp;
+            int target = i + rand() % (n - i);
+            tmp = current[i];
+            current[i] = current[target];
+            current[target] = tmp;
+        }
+        return current;
+    }
+};
+
+
