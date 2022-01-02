@@ -1,4 +1,4 @@
-# [leetcode 390. 消除游戏](https://leetcode-cn.com/problems/elimination-game/)
+# [390. 消除游戏](https://leetcode-cn.com/problems/elimination-game/)
 
 列表 arr 由在范围 [1, n] 中的所有整数组成，并按严格递增排序。请你对 arr 应用下述算法：
 
